@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Get the list of available governors
+governors=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)
+
+# Show the available governors
+echo "Available governors:"
+echo "$governors"
+
+# Ask the user to choose a governor
+read -p "Enter the name of the governor you want to set: " choice
+
+# Check if the chosen governor is available
+if [[ $governors =~ (^|[[:space:]])$choice($|[[:space:]]) ]]; then
+    # Set the chosen governor
+    for cpu in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+        echo "$choice" > "$cpu"
+    done
+    echo "Governor set to $choice."
+else
+    echo "The chosen governor is not available."
+fi
