@@ -1,0 +1,49 @@
+################# SCRIPT ZFS-Notify Bash Script (zfs-notify.sh) ####################
+
+#!/bin/bash
+# This script is designed to send an email when an event occurs in a ZFS pool.
+# It takes two arguments: the event that occurred, and the name of the pool in which it occurred.
+
+event=$1  # The first argument, representing the event.
+pool=$2  # The second argument, representing the name of the pool.
+
+# Get the hostname of the system.
+hostname=$(hostname)
+
+# Construct the email subject, containing the event and hostname.
+# Then, use msmtp to send the email.
+# Replace "your_email@example.com" with the actual recipient's email.
+echo "Subject: ZFS event: $event on $hostname" | msmtp --from=default -t your_email@example.com
+
+# Exit the script.
+exit 0
+
+################# ZFS-Start Bash Script (zfs-start.sh) #################     
+
+#!/bin/bash
+# This script is designed to continuously monitor a ZFS pool for events.
+# It does this by running the "zpool events -f" command, which outputs events as they occur.
+# The output from this command is piped into the zfs-notify.sh script.
+# As a result, an email notification is sent for each event.
+
+/usr/sbin/zpool events -f | /root/cron-scripts/zfs-notify.sh
+
+################# Systemd Service File (zfs-notify.service) ####################
+
+# This file defines a systemd service for the ZFS event notification system.
+# systemd is a system and service manager for Linux, and it controls how services start and run.
+
+# SYSTEMD 
+#/etc/systemd/system/zfs-notify.service
+
+[Unit]
+Description=ZFS event notification service
+
+[Service]
+# The systemd service is set up to start the zfs-start.sh script when the service is enabled.
+# This script will then monitor ZFS events and trigger email notifications.
+ExecStart=/root/cron-scripts/zfs-start.sh
+
+[Install]
+# By enabling this systemd service, the ZFS event notification system starts automatically at boot.
+WantedBy=multi-user.target
